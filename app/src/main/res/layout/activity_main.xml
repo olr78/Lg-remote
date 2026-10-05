@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <!-- Підключення -->
+        <LinearLayout style="@style/Row" android:gravity="center_vertical">
+            <EditText
+                android:id="@+id/ipEdit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="IP телевізора"
+                android:inputType="text"
+                android:textColorHint="#777777"
+                android:textColor="#FFFFFF" />
+            <Button android:id="@+id/btnScan" style="@style/Btn"
+                android:layout_width="wrap_content" android:layout_weight="0"
+                android:text="🔍" />
+            <Button android:id="@+id/btnConnect" style="@style/Btn"
+                android:layout_width="wrap_content" android:layout_weight="0"
+                android:text="Підкл." />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/statusText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="6dp"
+            android:text="Не підключено"
+            android:textColor="#AAAAAA"
+            android:textSize="13sp" />
+
+        <!-- Живлення / вхід / налаштування -->
+        <LinearLayout style="@style/Row">
+            <Button android:id="@+id/btnPowerOn" style="@style/Btn" android:text="⏻ Увімк" android:backgroundTint="#1E5E2E" />
+            <Button android:id="@+id/btnPowerOff" style="@style/Btn" android:text="⏻ Вимк" android:backgroundTint="#8B1A1A" />
+            <Button android:id="@+id/btnInput" style="@style/Btn" android:text="Вхід" />
+            <Button android:id="@+id/btnApps" style="@style/Btn" android:text="Апки" />
+        </LinearLayout>
+
+        <!-- D-pad -->
+        <LinearLayout style="@style/Row" android:layout_marginTop="8dp">
+            <Button android:id="@+id/btnBack" style="@style/Btn" android:text="↩ Назад" />
+            <Button android:id="@+id/btnUp" style="@style/BtnDpad" android:text="▲" />
+            <Button android:id="@+id/btnHome" style="@style/Btn" android:text="⌂ Home" />
+        </LinearLayout>
+        <LinearLayout style="@style/Row">
+            <Button android:id="@+id/btnLeft" style="@style/BtnDpad" android:text="◀" />
+            <Button android:id="@+id/btnOk" style="@style/BtnDpad" android:text="OK" android:backgroundTint="#C8102E" />
+            <Button android:id="@+id/btnRight" style="@style/BtnDpad" android:text="▶" />
+        </LinearLayout>
+        <LinearLayout style="@style/Row">
+            <Button android:id="@+id/btnMenu" style="@style/Btn" android:text="⚙ Меню" />
+            <Button android:id="@+id/btnDown" style="@style/BtnDpad" android:text="▼" />
+            <Button android:id="@+id/btnExit" style="@style/Btn" android:text="Exit" />
+        </LinearLayout>
+
+        <!-- Гучність / канали -->
+        <LinearLayout style="@style/Row" android:layout_marginTop="8dp">
+            <Button android:id="@+id/btnVolDown" style="@style/Btn" android:text="🔉 −" />
+            <Button android:id="@+id/btnMute" style="@style/Btn" android:text="🔇" />
+            <Button android:id="@+id/btnVolUp" style="@style/Btn" android:text="🔊 +" />
+        </LinearLayout>
+        <TextView
+            android:id="@+id/volumeText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="Гучність: —"
+            android:textColor="#AAAAAA" />
+        <LinearLayout style="@style/Row">
+            <Button android:id="@+id/btnChDown" style="@style/Btn" android:text="CH −" />
+            <Button android:id="@+id/btnInfo" style="@style/Btn" android:text="Info" />
+            <Button android:id="@+id/btnChUp" style="@style/Btn" android:text="CH +" />
+        </LinearLayout>
+
+        <!-- Медіа -->
+        <LinearLayout style="@style/Row" android:layout_marginTop="8dp">
+            <Button android:id="@+id/btnRew" style="@style/Btn" android:text="⏪" />
+            <Button android:id="@+id/btnPlay" style="@style/Btn" android:text="▶" />
+            <Button android:id="@+id/btnPause" style="@style/Btn" android:text="⏸" />
+            <Button android:id="@+id/btnStop" style="@style/Btn" android:text="⏹" />
+            <Button android:id="@+id/btnFf" style="@style/Btn" android:text="⏩" />
+        </LinearLayout>
+
+        <!-- Кольорові -->
+        <LinearLayout style="@style/Row">
+            <Button android:id="@+id/btnRed" style="@style/Btn" android:text="" android:backgroundTint="#B71C1C" />
+            <Button android:id="@+id/btnGreen" style="@style/Btn" android:text="" android:backgroundTint="#1B5E20" />
+            <Button android:id="@+id/btnYellow" style="@style/Btn" android:text="" android:backgroundTint="#F9A825" />
+            <Button android:id="@+id/btnBlue" style="@style/Btn" android:text="" android:backgroundTint="#0D47A1" />
+        </LinearLayout>
+
+        <!-- Тачпад (курсор Magic Remote) -->
+        <TextView
+            android:id="@+id/touchpad"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:layout_marginTop="8dp"
+            android:background="#1E1E1E"
+            android:gravity="center"
+            android:text="Тачпад: веди пальцем — курсор, тап — клік\nдвома пальцями — прокрутка"
+            android:textColor="#666666" />
+
+        <!-- Текст -->
+        <LinearLayout style="@style/Row" android:layout_marginTop="8dp" android:gravity="center_vertical">
+            <EditText
+                android:id="@+id/textEdit"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:hint="Текст у поле на ТВ"
+                android:textColorHint="#777777"
+                android:textColor="#FFFFFF" />
+            <Button android:id="@+id/btnSendText" style="@style/Btn"
+                android:layout_width="wrap_content" android:layout_weight="0" android:text="⏎" />
+            <Button android:id="@+id/btnBksp" style="@style/Btn"
+                android:layout_width="wrap_content" android:layout_weight="0" android:text="⌫" />
+        </LinearLayout>
+
+        <!-- Цифри -->
+        <GridLayout
+            android:id="@+id/numGrid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:columnCount="3" />
+
+        <!-- MAC для Wake-on-LAN -->
+        <EditText
+            android:id="@+id/macEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:hint="MAC ТВ для увімкнення (AA:BB:CC:DD:EE:FF)"
+            android:inputType="text"
+            android:textColorHint="#777777"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+</ScrollView>
