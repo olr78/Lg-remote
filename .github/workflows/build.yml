@@ -5,6 +5,8 @@ on:
     paths-ignore:
       - "ios/**"
       - ".github/workflows/ios.yml"
+      - "web/**"
+      - ".github/workflows/pages.yml"
   workflow_dispatch:
 
 permissions:

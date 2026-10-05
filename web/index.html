@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>LG Remote</title>
+<meta name="theme-color" content="#121212">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LG Remote">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+  :root {
+    --bg: #121212; --btn: #2c2c2c; --btn-d: #3a3a3a; --accent: #c8102e;
+    --fg: #eee; --muted: #9a9a9a; --ok: #66bb6a; --pad: #1e1e1e;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.3 -apple-system, system-ui, "Segoe UI", Roboto, sans-serif; }
+  body { padding: max(12px, env(safe-area-inset-top)) 12px max(16px, env(safe-area-inset-bottom)); }
+  main { max-width: 480px; margin: 0 auto; display: flex; flex-direction: column; gap: 8px; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  button {
+    border: 0; border-radius: 10px; background: var(--btn); color: #fff;
+    height: 52px; font-size: 16px; font-weight: 500; touch-action: manipulation;
+    user-select: none; -webkit-user-select: none; transition: filter .08s, transform .08s;
+  }
+  button:active, button.pressed { filter: brightness(1.5); transform: scale(.97); }
+  .d { height: 72px; font-size: 24px; background: var(--btn-d); }
+  .tall { height: 72px; }
+  .ok { background: var(--accent); }
+  .on { background: #1e5e2e; } .off { background: #8b1a1a; }
+  .c { height: 40px; }
+  input {
+    flex: 1; min-width: 0; height: 44px; border-radius: 10px; border: 1px solid #333;
+    background: #1b1b1b; color: #fff; padding: 0 12px; font-size: 16px;
+  }
+  .small { flex: 0 0 auto; padding: 0 14px; height: 44px; }
+  #status { font-size: 13px; color: var(--muted); min-height: 1.3em; }
+  #status.connected { color: var(--ok); }
+  #status a { color: #8ab4ff; }
+  #vol { text-align: center; font-size: 13px; color: var(--muted); }
+  .padwrap { display: flex; gap: 8px; height: 180px; }
+  #pad, #scroll { border-radius: 12px; display: flex; align-items: center; justify-content: center;
+    color: #666; font-size: 13px; touch-action: none; user-select: none; -webkit-user-select: none; }
+  #pad { flex: 1; background: var(--pad); text-align: center; padding: 0 12px; }
+  #scroll { flex: 0 0 44px; background: #262626; font-size: 20px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  details { background: #1a1a1a; border-radius: 10px; padding: 10px 12px; font-size: 14px; color: #bbb; }
+  details summary { cursor: pointer; color: #ddd; }
+  details ol { padding-left: 20px; margin: 8px 0 0; }
+  dialog { background: #1e1e1e; color: #eee; border: 0; border-radius: 14px; padding: 0;
+    width: min(420px, 92vw); max-height: 75vh; }
+  dialog::backdrop { background: rgba(0,0,0,.6); }
+  dialog h3 { margin: 0; padding: 14px 16px; border-bottom: 1px solid #333; font-size: 17px; }
+  dialog ul { list-style: none; margin: 0; padding: 0; overflow-y: auto; max-height: 60vh; }
+  dialog li { padding: 14px 16px; border-bottom: 1px solid #2a2a2a; cursor: pointer; }
+  dialog li:active { background: #333; }
+  dialog .close { width: 100%; border-radius: 0 0 14px 14px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="row">
+    <input id="ip" placeholder="IP телевізора" inputmode="decimal" autocomplete="off">
+    <button id="connect" class="small ok">Підкл.</button>
+  </div>
+  <div id="status">Не підключено</div>
+
+  <div class="row">
+    <button class="on" data-act="powerOn">⏻ Увімк</button>
+    <button class="off" data-act="powerOff">⏻ Вимк</button>
+    <button data-act="inputs">Вхід</button>
+    <button data-act="apps">Апки</button>
+  </div>
+
+  <div class="row">
+    <button class="tall" data-key="BACK">↩ Назад</button>
+    <button class="d" data-key="UP" data-repeat>▲</button>
+    <button class="tall" data-key="HOME">⌂ Home</button>
+  </div>
+  <div class="row">
+    <button class="d" data-key="LEFT" data-repeat>◀</button>
+    <button class="d ok" data-key="ENTER">OK</button>
+    <button class="d" data-key="RIGHT" data-repeat>▶</button>
+  </div>
+  <div class="row">
+    <button class="tall" data-key="MENU">⚙ Меню</button>
+    <button class="d" data-key="DOWN" data-repeat>▼</button>
+    <button class="tall" data-key="EXIT">Exit</button>
+  </div>
+
+  <div class="row">
+    <button data-uri="ssap://audio/volumeDown" data-repeat>🔉 −</button>
+    <button data-act="mute" id="muteBtn">🔇</button>
+    <button data-uri="ssap://audio/volumeUp" data-repeat>🔊 +</button>
+  </div>
+  <div id="vol">Гучність: —</div>
+  <div class="row">
+    <button data-uri="ssap://tv/channelDown">CH −</button>
+    <button data-key="INFO">Info</button>
+    <button data-uri="ssap://tv/channelUp">CH +</button>
+  </div>
+
+  <div class="row">
+    <button data-uri="ssap://media.controls/rewind">⏪</button>
+    <button data-uri="ssap://media.controls/play">▶</button>
+    <button data-uri="ssap://media.controls/pause">⏸</button>
+    <button data-uri="ssap://media.controls/stop">⏹</button>
+    <button data-uri="ssap://media.controls/fastForward">⏩</button>
+  </div>
+  <div class="row">
+    <button class="c" style="background:#b71c1c" data-key="RED" aria-label="Червона"></button>
+    <button class="c" style="background:#1b5e20" data-key="GREEN" aria-label="Зелена"></button>
+    <button class="c" style="background:#f9a825" data-key="YELLOW" aria-label="Жовта"></button>
+    <button class="c" style="background:#0d47a1" data-key="BLUE" aria-label="Синя"></button>
+  </div>
+
+  <div class="padwrap">
+    <div id="pad">Тачпад: веди — курсор, тап — клік</div>
+    <div id="scroll">⇅</div>
+  </div>
+
+  <div class="row">
+    <input id="text" placeholder="Текст у поле на ТВ" autocomplete="off">
+    <button id="sendText" class="small">⏎</button>
+    <button id="bksp" class="small">⌫</button>
+  </div>
+
+  <div class="grid" id="numpad"></div>
+
+  <details id="help">
+    <summary>Перше підключення</summary>
+    <ol>
+      <li>Телефон і ТВ мають бути в одній Wi-Fi мережі. Впишіть IP телевізора (Налаштування ТВ → Мережа).</li>
+      <li>Сайт працює по HTTPS, тому до ТВ підключається захищено — <b>wss://IP:3001</b> із самопідписаним сертифікатом. Один раз відкрийте <a id="certLink" href="#" target="_blank" rel="noopener">https://IP:3001</a>, натисніть «Додатково → Перейти на сайт» і поверніться сюди.</li>
+      <li>Натисніть «Підкл.» і підтвердіть запит на екрані ТВ.</li>
+      <li>Додайте сторінку на головний екран (Поділитися → На початковий екран) — відкриватиметься як застосунок.</li>
+    </ol>
+    <p>Кнопка «Увімк» з браузера не працює: сайти не можуть надсилати Wake-on-LAN.</p>
+  </details>
+</main>
+
+<dialog id="list"><h3 id="listTitle"></h3><ul id="listItems"></ul><button class="close" id="listClose">Закрити</button></dialog>
+
+<script>
+(() => {
+  'use strict';
+
+  const PERMISSIONS = ["LAUNCH","LAUNCH_WEBAPP","APP_TO_APP","CLOSE","TEST_OPEN","TEST_PROTECTED",
+    "CONTROL_AUDIO","CONTROL_DISPLAY","CONTROL_INPUT_JOYSTICK","CONTROL_INPUT_MEDIA_RECORDING",
+    "CONTROL_INPUT_MEDIA_PLAYBACK","CONTROL_INPUT_TV","CONTROL_POWER","CONTROL_INPUT_TEXT",
+    "CONTROL_MOUSE_AND_KEYBOARD","READ_APP_STATUS","READ_CURRENT_CHANNEL","READ_INPUT_DEVICE_LIST",
+    "READ_NETWORK_STATE","READ_RUNNING_APPS","READ_TV_CHANNEL_LIST","WRITE_NOTIFICATION_TOAST",
+    "READ_POWER_STATE","READ_COUNTRY_INFO","READ_INSTALLED_APPS","READ_LGE_SDX","READ_NOTIFICATIONS",
+    "SEARCH","WRITE_SETTINGS","WRITE_NOTIFICATION_ALERT","CHECK_BLUETOOTH_DEVICE",
+    "STB_INTERNAL_CONNECTION","ADD_LAUNCHER_CHANNEL","SET_CHANNEL","READ_SETTINGS","READ_UPDATE_INFO",
+    "UPDATE_FROM_REMOTE_APP","READ_LGE_TV_INPUT_EVENTS","READ_TV_CURRENT_TIME"];
+
+  const $ = (id) => document.getElementById(id);
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} },
+  };
+  const secure = location.protocol === 'https:';
+
+  let ws = null, inputWs = null, host = '', connected = false, nextId = 1, muted = false, pingTimer = null;
+  const callbacks = new Map();
+
+  function status(text, ok = false, html = false) {
+    const el = $('status');
+    el.classList.toggle('connected', ok);
+    if (html) el.innerHTML = text; else el.textContent = text;
+  }
+
+  function certUrl(h) { return `https://${h}:3001/`; }
+  function updateCertLink() {
+    const h = $('ip').value.trim() || 'IP';
+    $('certLink').textContent = certUrl(h);
+    $('certLink').href = certUrl(h);
+  }
+
+  // ------------------------------------------------------------ connection
+  function connect() {
+    disconnect();
+    host = $('ip').value.trim();
+    if (!host) { status('Введіть IP телевізора'); return; }
+    store.set('ip', host);
+    updateCertLink();
+    const url = secure ? `wss://${host}:3001/` : `ws://${host}:3000/`;
+    status(`Підключення до ${host}…`);
+    let opened = false;
+    const sock = new WebSocket(url);
+    ws = sock;
+    sock.onopen = () => { opened = true; register(); };
+    sock.onmessage = (e) => { if (sock === ws) handle(e.data); };
+    sock.onclose = () => {
+      if (sock !== ws) return;
+      ws = null; inputWs = null; connected = false; clearInterval(pingTimer);
+      if (!opened && secure) {
+        status(`Не вдалося з'єднатись. Відкрийте <a href="${certUrl(host)}" target="_blank" rel="noopener">${certUrl(host)}</a>, прийміть сертифікат і натисніть «Підкл.» ще раз. Якщо сторінка ТВ не відкривається взагалі — ця модель не підтримує захищене з'єднання.`, false, true);
+        $('help').open = true;
+      } else {
+        status(opened ? "З'єднання закрито" : "Не вдалося з'єднатись — перевірте IP і що ТВ увімкнений");
+      }
+    };
+  }
+
+  function disconnect() {
+    if (inputWs) { try { inputWs.close(); } catch {} inputWs = null; }
+    if (ws) { const s = ws; ws = null; try { s.close(); } catch {} }
+    callbacks.clear(); connected = false; clearInterval(pingTimer);
+  }
+
+  function send(obj) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj)); }
+
+  function register() {
+    const key = store.get('key_' + host);
+    const payload = {
+      forcePairing: false, pairingType: 'PROMPT',
+      manifest: {
+        manifestVersion: 1, appVersion: '1.0', permissions: PERMISSIONS,
+        signed: {
+          appId: 'ua.hmara.lgremote', vendorId: 'ua.hmara', created: '20261005',
+          localizedAppNames: { '': 'LG Remote' }, localizedVendorNames: { '': 'Hmara' },
+          permissions: PERMISSIONS, serial: 'lgremote-web-0001',
+        },
+      },
+    };
+    if (key) payload['client-key'] = key;
+    else status('Підтвердіть запит на екрані телевізора…');
+    send({ type: 'register', id: 'register_0', payload });
+  }
+
+  function handle(text) {
+    let msg; try { msg = JSON.parse(text); } catch { return; }
+    const { type, id } = msg; const p = msg.payload || {};
+    if (type === 'registered') {
+      if (p['client-key']) store.set('key_' + host, p['client-key']);
+      connected = true;
+      status(`Підключено: ${host}`, true);
+      openInput(); subscribeVolume();
+      clearInterval(pingTimer);
+      // тримаємо з'єднання живим
+      pingTimer = setInterval(() => request('ssap://audio/getVolume'), 25000);
+    } else if (type === 'error' && id === 'register_0') {
+      if (store.get('key_' + host)) { store.set('key_' + host, null); register(); }
+      else status('Відмовлено: ' + (msg.error || ''));
+    } else if (callbacks.has(id)) {
+      const cb = callbacks.get(id);
+      if (id.startsWith('req_')) callbacks.delete(id);
+      cb(p);
+    }
+  }
+
+  function request(uri, payload, cb) {
+    const id = 'req_' + nextId++;
+    if (cb) callbacks.set(id, cb);
+    const m = { type: 'request', id, uri };
+    if (payload) m.payload = payload;
+    send(m);
+  }
+
+  function subscribe(uri, cb) {
+    const id = 'sub_' + nextId++;
+    callbacks.set(id, cb);
+    send({ type: 'subscribe', id, uri });
+  }
+
+  function subscribeVolume() {
+    subscribe('ssap://audio/getVolume', (p) => {
+      const vs = p.volumeStatus;
+      const vol = vs ? vs.volume : p.volume;
+      muted = vs ? !!vs.muteStatus : !!p.muted;
+      if (typeof vol === 'number') $('vol').textContent = `Гучність: ${vol}${muted ? ' (без звуку)' : ''}`;
+      $('muteBtn').textContent = muted ? '🔇 Увімк. звук' : '🔇';
+    });
+  }
+
+  // --------------------------------------------------------- pointer socket
+  function openInput() {
+    request('ssap://com.webos.service.networkinput/getPointerInputSocket', null, (p) => {
+      let path = p.socketPath;
+      if (!path) return;
+      if (secure) path = path.replace(/^ws:/, 'wss:').replace(':3000/', ':3001/');
+      const s = new WebSocket(path);
+      s.onclose = () => { if (inputWs === s) inputWs = null; };
+      inputWs = s;
+    });
+  }
+
+  function sendInput(str) {
+    if (inputWs && inputWs.readyState === 1) inputWs.send(str);
+    else if (connected && !inputWs) openInput();
+  }
+  const button = (name) => sendInput(`type:button\nname:${name}\n\n`);
+  const move = (dx, dy) => sendInput(`type:move\ndx:${dx}\ndy:${dy}\ndown:0\n\n`);
+  const click = () => sendInput('type:click\n\n');
+  const scroll = (dy) => sendInput(`type:scroll\ndx:0\ndy:${dy}\n\n`);
+
+  // ---------------------------------------------------------------- lists
+  function showList(title, items, onPick) {
+    if (!items.length) { status('Список порожній', connected); return; }
+    $('listTitle').textContent = title;
+    const ul = $('listItems'); ul.innerHTML = '';
+    for (const it of items) {
+      const li = document.createElement('li');
+      li.textContent = it.title;
+      li.onclick = () => { onPick(it.id); $('list').close(); };
+      ul.appendChild(li);
+    }
+    $('list').showModal();
+  }
+  $('listClose').onclick = () => $('list').close();
+
+  const actions = {
+    powerOn() {
+      status('Сайт не може увімкнути ТВ (браузери не надсилають Wake-on-LAN). Увімкніть пультом або через LG ThinQ.', connected);
+    },
+    powerOff() { request('ssap://system/turnOff'); },
+    mute() { request('ssap://audio/setMute', { mute: !muted }); },
+    inputs() {
+      request('ssap://tv/getExternalInputList', null, (p) => showList('Вхід',
+        (p.devices || []).map(d => ({ id: d.id, title: d.label || d.id })),
+        (id) => request('ssap://tv/switchInput', { inputId: id })));
+    },
+    apps() {
+      request('ssap://com.webos.applicationManager/listLaunchPoints', null, (p) => showList('Застосунки',
+        (p.launchPoints || []).map(a => ({ id: a.id, title: a.title || a.id }))
+          .sort((a, b) => a.title.localeCompare(b.title)),
+        (id) => request('ssap://system.launcher/launch', { id })));
+    },
+  };
+
+  // ------------------------------------------------------------- buttons
+  function vibrate() { if (navigator.vibrate) navigator.vibrate(10); }
+
+  function bindButton(btn, fn) {
+    const repeat = btn.hasAttribute('data-repeat');
+    let t1 = null, t2 = null;
+    const stop = () => { clearTimeout(t1); clearInterval(t2); t1 = t2 = null; btn.classList.remove('pressed'); };
+    btn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      btn.classList.add('pressed');
+      vibrate(); fn();
+      if (repeat) t1 = setTimeout(() => { t2 = setInterval(fn, 120); }, 450);
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => btn.addEventListener(ev, stop));
+    btn.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+
+  document.querySelectorAll('[data-key]').forEach(b => bindButton(b, () => button(b.dataset.key)));
+  document.querySelectorAll('[data-uri]').forEach(b => bindButton(b, () => request(b.dataset.uri)));
+  document.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => { vibrate(); actions[b.dataset.act](); }));
+
+  const numpad = $('numpad');
+  ['1','2','3','4','5','6','7','8','9','—','0','LIST'].forEach(k => {
+    const b = document.createElement('button');
+    b.textContent = k;
+    bindButton(b, () => button(k === '—' ? 'DASH' : k));
+    numpad.appendChild(b);
+  });
+
+  // ------------------------------------------------------------ touchpad
+  (function touchpad() {
+    const pad = $('pad');
+    let lx = 0, ly = 0, travel = 0, downAt = 0, active = false;
+    pad.addEventListener('pointerdown', (e) => {
+      active = true; lx = e.clientX; ly = e.clientY; travel = 0; downAt = Date.now();
+      pad.setPointerCapture(e.pointerId);
+    });
+    pad.addEventListener('pointermove', (e) => {
+      if (!active) return;
+      const dx = e.clientX - lx, dy = e.clientY - ly;
+      lx = e.clientX; ly = e.clientY;
+      travel += Math.abs(dx) + Math.abs(dy);
+      const ix = Math.round(dx * 1.6), iy = Math.round(dy * 1.6);
+      if (ix || iy) move(ix, iy);
+    });
+    const end = () => {
+      if (active && travel < 10 && Date.now() - downAt < 300) { vibrate(); click(); }
+      active = false;
+    };
+    pad.addEventListener('pointerup', end);
+    pad.addEventListener('pointercancel', () => { active = false; });
+
+    const sc = $('scroll');
+    let sy = 0, acc = 0, sActive = false;
+    sc.addEventListener('pointerdown', (e) => { sActive = true; sy = e.clientY; acc = 0; sc.setPointerCapture(e.pointerId); });
+    sc.addEventListener('pointermove', (e) => {
+      if (!sActive) return;
+      acc += e.clientY - sy; sy = e.clientY;
+      if (Math.abs(acc) > 20) { scroll(acc > 0 ? -1 : 1); acc = 0; }
+    });
+    ['pointerup', 'pointercancel'].forEach(ev => sc.addEventListener(ev, () => { sActive = false; }));
+  })();
+
+  // ----------------------------------------------------------------- text
+  function sendText() {
+    const t = $('text').value;
+    if (t) request('ssap://com.webos.service.ime/insertText', { text: t, replace: 0 });
+    request('ssap://com.webos.service.ime/sendEnterKey');
+    $('text').value = '';
+  }
+  $('sendText').onclick = sendText;
+  $('text').addEventListener('keydown', (e) => { if (e.key === 'Enter') sendText(); });
+  $('bksp').onclick = () => request('ssap://com.webos.service.ime/deleteCharacters', { count: 1 });
+
+  // ------------------------------------------------------------- startup
+  $('connect').onclick = () => { $('ip').blur(); connect(); };
+  $('ip').addEventListener('keydown', (e) => { if (e.key === 'Enter') { $('ip').blur(); connect(); } });
+  $('ip').addEventListener('input', updateCertLink);
+
+  $('ip').value = store.get('ip') || '';
+  updateCertLink();
+  if ($('ip').value) connect(); else $('help').open = true;
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && !connected && $('ip').value.trim()) connect();
+  });
+})();
+</script>
+</body>
+</html>
