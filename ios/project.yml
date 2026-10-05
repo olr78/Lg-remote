@@ -1,0 +1,32 @@
+name: LgRemote
+options:
+  bundleIdPrefix: ua.hmara
+  deploymentTarget:
+    iOS: "15.0"
+targets:
+  LgRemote:
+    type: application
+    platform: iOS
+    sources: [LgRemote]
+    scheme: {}
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ua.hmara.lgremote
+        PRODUCT_NAME: LgRemote
+        MARKETING_VERSION: "1.0"
+        CURRENT_PROJECT_VERSION: 1
+        SWIFT_VERSION: "5.0"
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGNING_ALLOWED: NO
+    info:
+      path: LgRemote/Info.plist
+      properties:
+        CFBundleDisplayName: LG Remote
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIUserInterfaceStyle: Dark
+        NSLocalNetworkUsageDescription: Потрібно для керування телевізором LG у вашій Wi-Fi мережі.
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+          NSAllowsArbitraryLoads: true
